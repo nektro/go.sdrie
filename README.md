@@ -13,11 +13,11 @@ $ go get github.com/nektro/sdrie`
 ## Usage
 ### `sdrie.Set`
 - `Set(key string, value string, lifespan int64)`
-- `Set` will add `value` to the data store associated to `key` and will survive for `lifespan` seconds.
+- `Set` adds `value` to the data store associated to `key` and will survive for `lifespan` seconds.
 
 ### `sdrie.Get`
 - `Get(key string) interface{}`
-- `Get` will retrieve the value associated to `key`, or `nil` otherwise.
+- `Get` retrieves the value associated to `key`, or `nil` otherwise.
 
 ### `sdrie.Has`
 - `Has(key string) bool`
