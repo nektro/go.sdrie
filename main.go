@@ -20,7 +20,7 @@ var (
 // Set inserts {value} into the data store with an association to {key}. This
 // mapping will only exist for {lifespan} seconds. After which, any subsequent
 // calls to Get will return nil unless a new value is Set.
-func Set(key string, value string, lifespan int64) {
+func Set(key string, value interface{}, lifespan int64) {
 	for e := line.Front(); e != nil; e = e.Next() {
 		k := e.Value.(string)
 		if k == key {
