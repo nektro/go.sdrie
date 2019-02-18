@@ -32,9 +32,6 @@ When making a pull request, please have it be associated with an issue and make 
 
 [![pulls](https://img.shields.io/github/issues-pr/nektro/sdrie.svg)](https://github.com/nektro/sdrie/pulls)
 
-## Donate
-[![paypal](https://img.shields.io/badge/donate-paypal-blue.svg?logo=paypal)](https://www.paypal.me/nektro)
-
 ## Contact
 - hello@nektro.net
 - Meghan#2032 on discordapp.com
