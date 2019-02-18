@@ -1,6 +1,6 @@
 # sdrie
-![loc](https://tokei.rs/b1/github/nektro/andesite)
-[![license](https://img.shields.io/github/license/nektro/andesite.svg)](https://github.com/nektro/andesite/blob/master/LICENSE)
+![loc](https://tokei.rs/b1/github/nektro/sdrie)
+[![license](https://img.shields.io/github/license/nektro/sdrie.svg)](https://github.com/nektro/sdrie/blob/master/LICENSE)
 [![paypal](https://img.shields.io/badge/donate-paypal-blue.svg?logo=paypal)](https://www.paypal.me/nektro)
 
 An in-process key/value store for data with expiration dates in Go
@@ -26,11 +26,11 @@ $ go get github.com/nektro/sdrie`
 ## Contributing
 We take issues all the time right here on GitHub. We use labels extensively to show the progress through the fixing process. Question issues are okay but make sure to close the issue when it's been answered!
 
-[![issues](https://img.shields.io/github/issues/nektro/andesite.svg)](https://github.com/nektro/andesite/issues)
+[![issues](https://img.shields.io/github/issues/nektro/sdrie.svg)](https://github.com/nektro/sdrie/issues)
 
 When making a pull request, please have it be associated with an issue and make a comment on the issue saying that you're working on it so everyone else knows what's going on :D
 
-[![pulls](https://img.shields.io/github/issues-pr/nektro/andesite.svg)](https://github.com/nektro/andesite/pulls)
+[![pulls](https://img.shields.io/github/issues-pr/nektro/sdrie.svg)](https://github.com/nektro/sdrie/pulls)
 
 ## Donate
 [![paypal](https://img.shields.io/badge/donate-paypal-blue.svg?logo=paypal)](https://www.paypal.me/nektro)
