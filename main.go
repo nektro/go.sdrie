@@ -55,7 +55,6 @@ func Has(key string) bool {
 //
 
 func mutexGet(key string) sdrieMapValue {
-	// fmt.Println("[] retrieved key " + key)
 	mutex.RLock()
 	smv := data[key]
 	mutex.RUnlock()
@@ -63,14 +62,12 @@ func mutexGet(key string) sdrieMapValue {
 }
 
 func mutexSet(key string, value sdrieMapValue) {
-	// fmt.Println("[] added key " + key)
 	mutex.Lock()
 	data[key] = value
 	mutex.Unlock()
 }
 
 func mutexDelete(key string) {
-	// fmt.Println("[] removed key " + key)
 	mutex.Lock()
 	delete(data, key)
 	mutex.Unlock()
