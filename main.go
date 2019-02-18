@@ -1,63 +1,101 @@
 package sdrie
 
 import (
-	"errors"
-	"fmt"
+	"container/list"
+	"sync"
 	"time"
 )
 
 type sdrieMapValue struct {
-	added    int64
-	lifespan int64
-	value    interface{}
+	death int64
+	value interface{}
 }
 
 var (
-	data = map[string]sdrieMapValue{}
+	data  = map[string]sdrieMapValue{}
+	line  = list.New()
+	mutex = sync.RWMutex{}
 )
 
-// Set adds {value} to the data store associated to {key}. If the {key} already
-// exists in the store then the previous value will be overwritten. After {lifespan}
-// attempting to Get {key} will return an error until a new value is added.
-func Set(key string, value interface{}, lifespan int64) {
-	data[key] = sdrieMapValue{
-		time.Now().Unix(),
-		lifespan,
+// Set inserts {value} into the data store with an association to {key}. This
+// mapping will only exist for {lifespan} seconds. After which, any subsequent
+// calls to Get will return nil unless a new value is Set.
+func Set(key string, value string, lifespan int64) {
+	for e := line.Front(); e != nil; e = e.Next() {
+		k := e.Value.(string)
+		if k == key {
+			line.Remove(e)
+		}
+	}
+	temp := sdrieMapValue{
+		time.Now().Unix() + lifespan,
 		value,
 	}
-	death := lifespan * int64(time.Second.Seconds())
-	time.AfterFunc(time.Duration(death), func() {
-		if !Has(key) {
-			return
-		}
-		if time.Now().Unix() < data[key].lifespan {
-			return
-		}
-		delete(data, key)
-	})
+	mutexSet(key, temp)
+	line.PushBack(key)
 }
 
-// Has returns a boolean based on whether the store contains a value for {key}
-func Has(key string) bool {
-	_, ok := data[key]
-	return ok
-}
-
-// Get returns the value in the store associated to {key}, otherwise and nil
-// if no value is found.
+// Get retrieves the current live value associated to {key} in the store.
 func Get(key string) interface{} {
 	if !Has(key) {
 		return nil
 	}
-	return data[key].value
+	return mutexGet(key).value
 }
 
-// Remove preemptively removes {key} from the store even if the original
-// lifespan has not passed.
-func Remove(key string) error {
-	if !Has(key) {
-		return errors.New(fmt.Sprintf("Key '%s' not found in store", key))
-	}
+// Has returns a boolean based on whether or not the store contains a value for
+// {key}.
+func Has(key string) bool {
+	mutex.RLock()
+	_, ok := data[key]
+	mutex.RUnlock()
+	return ok
+}
+
+//
+
+func mutexGet(key string) sdrieMapValue {
+	// fmt.Println("[] retrieved key " + key)
+	mutex.RLock()
+	smv := data[key]
+	mutex.RUnlock()
+	return smv
+}
+
+func mutexSet(key string, value sdrieMapValue) {
+	// fmt.Println("[] added key " + key)
+	mutex.Lock()
+	data[key] = value
+	mutex.Unlock()
+}
+
+func mutexDelete(key string) {
+	// fmt.Println("[] removed key " + key)
+	mutex.Lock()
 	delete(data, key)
-	return nil
+	mutex.Unlock()
+}
+
+//
+
+func init() {
+	go checkForDeadKeys()
+}
+
+func checkForDeadKeys() {
+	for true {
+		now := time.Now().Unix()
+		toRemove := []*list.Element{}
+		for e := line.Front(); e != nil; e = e.Next() {
+			k := e.Value.(string)
+			if data[k].death <= now {
+				toRemove = append(toRemove, e)
+				mutexDelete(k)
+			}
+		}
+		for _, item := range toRemove {
+			line.Remove(item)
+		}
+		time.Sleep(time.Second)
+	}
 }
