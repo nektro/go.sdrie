@@ -11,15 +11,19 @@ $ go get -u github.com/nektro/sdrie
 ```
 
 ## Usage
-### `sdrie.Set`
+### `sdrie.New`
+- `New() SdrieDataStore`
+- `New` returns a new instance of a `SdrieDataStore`.
+
+### `SdrieDataStore.Set`
 - `Set(key string, value string, lifespan int64)`
 - `Set` adds `value` to the data store associated to `key` and will survive for `lifespan` seconds.
 
-### `sdrie.Get`
+### `SdrieDataStore.Get`
 - `Get(key string) interface{}`
 - `Get` retrieves the value associated to `key`, or `nil` otherwise.
 
-### `sdrie.Has`
+### `SdrieDataStore.Has`
 - `Has(key string) bool`
 - `Has` returns a `bool` based on whether or not `key` exists in the data store. 
 
