@@ -7,7 +7,7 @@ An in-process key/value store for data with expiration dates in Go
 
 ## Installing
 ```
-$ go get github.com/nektro/sdrie`
+$ go get github.com/nektro/sdrie
 ```
 
 ## Usage
