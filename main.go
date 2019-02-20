@@ -6,92 +6,98 @@ import (
 	"time"
 )
 
+type SdrieDataStore struct {
+	data  map[string]sdrieMapValue
+	line  *list.List
+	mutex sync.RWMutex
+}
+
 type sdrieMapValue struct {
 	death int64
 	value interface{}
 }
 
-var (
-	data  = map[string]sdrieMapValue{}
-	line  = list.New()
-	mutex = sync.RWMutex{}
-)
+func New() SdrieDataStore {
+	sds := SdrieDataStore{
+		map[string]sdrieMapValue{},
+		list.New(),
+		sync.RWMutex{},
+	}
+	go sds.checkForDeadKeys()
+	return sds
+}
 
 // Set inserts {value} into the data store with an association to {key}. This
 // mapping will only exist for {lifespan} seconds. After which, any subsequent
 // calls to Get will return nil unless a new value is Set.
-func Set(key string, value interface{}, lifespan int64) {
-	for e := line.Front(); e != nil; e = e.Next() {
+func (sds SdrieDataStore) Set(key string, value interface{}, lifespan int64) {
+	for e := sds.line.Front(); e != nil; e = e.Next() {
 		k := e.Value.(string)
 		if k == key {
-			line.Remove(e)
+			sds.line.Remove(e)
 		}
 	}
 	temp := sdrieMapValue{
 		time.Now().Unix() + lifespan,
 		value,
 	}
-	mutexSet(key, temp)
-	line.PushBack(key)
+	sds.mutexSet(key, temp)
+	sds.line.PushBack(key)
 }
 
 // Get retrieves the current live value associated to {key} in the store.
-func Get(key string) interface{} {
-	if !Has(key) {
+func (sds SdrieDataStore) Get(key string) interface{} {
+	if !sds.Has(key) {
 		return nil
 	}
-	return mutexGet(key).value
+	return sds.mutexGet(key).value
 }
 
 // Has returns a boolean based on whether or not the store contains a value for
 // {key}.
-func Has(key string) bool {
-	mutex.RLock()
-	_, ok := data[key]
-	mutex.RUnlock()
+func (sds SdrieDataStore) Has(key string) bool {
+	sds.mutex.RLock()
+	_, ok := sds.data[key]
+	sds.mutex.RUnlock()
 	return ok
 }
 
 //
 
-func mutexGet(key string) sdrieMapValue {
-	mutex.RLock()
-	smv := data[key]
-	mutex.RUnlock()
+func (sds SdrieDataStore) mutexGet(key string) sdrieMapValue {
+	sds.mutex.RLock()
+	smv := sds.data[key]
+	sds.mutex.RUnlock()
 	return smv
 }
 
-func mutexSet(key string, value sdrieMapValue) {
-	mutex.Lock()
-	data[key] = value
-	mutex.Unlock()
+func (sds SdrieDataStore) mutexSet(key string, value sdrieMapValue) {
+	sds.mutex.Lock()
+	sds.data[key] = value
+	sds.mutex.Unlock()
 }
 
-func mutexDelete(key string) {
-	mutex.Lock()
-	delete(data, key)
-	mutex.Unlock()
+func (sds SdrieDataStore) mutexDelete(key string) {
+	sds.mutex.Lock()
+	delete(sds.data, key)
+	sds.mutex.Unlock()
 }
 
 //
 
-func init() {
-	go checkForDeadKeys()
-}
-
-func checkForDeadKeys() {
+func (sds SdrieDataStore) checkForDeadKeys() {
 	for true {
 		now := time.Now().Unix()
 		toRemove := []*list.Element{}
-		for e := line.Front(); e != nil; e = e.Next() {
+		for e := sds.line.Front(); e != nil; e = e.Next() {
 			k := e.Value.(string)
-			if data[k].death <= now {
+			if sds.data[k].death <= now {
 				toRemove = append(toRemove, e)
-				mutexDelete(k)
+				sds.mutexDelete(k)
 			}
 		}
 		for _, item := range toRemove {
-			line.Remove(item)
+			sds.line.Remove(item)
 		}
 		time.Sleep(time.Second)
 	}
