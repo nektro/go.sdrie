@@ -2,6 +2,7 @@
 ![loc](https://tokei.rs/b1/github/nektro/sdrie)
 [![license](https://img.shields.io/github/license/nektro/sdrie.svg)](https://github.com/nektro/sdrie/blob/master/LICENSE)
 [![paypal](https://img.shields.io/badge/donate-paypal-blue.svg?logo=paypal)](https://www.paypal.me/nektro)
+[![discord](https://img.shields.io/discord/551971034593755159.svg)](https://discord.gg/P6Y4zQC)
 
 An in-process key/value store for data with expiration dates in Go
 
