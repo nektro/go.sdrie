@@ -47,28 +47,33 @@ func (sds SdrieDataStore) Set(key string, value interface{}, lifespan int64) {
 
 // Get retrieves the current live value associated to {key} in the store.
 func (sds SdrieDataStore) Get(key string) interface{} {
-	if !sds.Has(key) {
-		return nil
-	}
-	return sds.mutexGet(key).value
+	return sds.mutexGet(key)
 }
 
 // Has returns a boolean based on whether or not the store contains a value for
 // {key}.
 func (sds SdrieDataStore) Has(key string) bool {
+	return sds.mutexHas(key)
+}
+
+//
+
+func (sds SdrieDataStore) mutexHas(key string) bool {
 	sds.mutex.RLock()
 	_, ok := sds.data[key]
 	sds.mutex.RUnlock()
 	return ok
 }
 
-//
-
-func (sds SdrieDataStore) mutexGet(key string) sdrieMapValue {
+func (sds SdrieDataStore) mutexGet(key string) interface{} {
 	sds.mutex.RLock()
-	smv := sds.data[key]
+	smv, ok := sds.data[key]
 	sds.mutex.RUnlock()
-	return smv
+	if ok {
+		return smv.value
+	} else {
+		return nil
+	}
 }
 
 func (sds SdrieDataStore) mutexSet(key string, value sdrieMapValue) {
