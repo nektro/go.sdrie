@@ -56,13 +56,17 @@ func (sds SdrieDataStore) Get(key string) interface{} {
 // Has returns a boolean based on whether or not the store contains a value for
 // {key}.
 func (sds SdrieDataStore) Has(key string) bool {
+	return sds.mutexHas(key)
+}
+
+//
+
+func (sds SdrieDataStore) mutexHas(key string) bool {
 	sds.mutex.RLock()
 	_, ok := sds.data[key]
 	sds.mutex.RUnlock()
 	return ok
 }
-
-//
 
 func (sds SdrieDataStore) mutexGet(key string) sdrieMapValue {
 	sds.mutex.RLock()
