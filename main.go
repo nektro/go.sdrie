@@ -27,6 +27,10 @@ func New() SdrieDataStore {
 	return sds
 }
 
+func (sds SdrieDataStore) Delete(key string) {
+	sds.mutexDelete(key)
+}
+
 // Set inserts {value} into the data store with an association to {key}. This
 // mapping will only exist for {lifespan} seconds. After which, any subsequent
 // calls to Get will return nil unless a new value is Set.
@@ -65,7 +69,7 @@ func (sds SdrieDataStore) mutexHas(key string) bool {
 	sds.mutex.RLock()
 	smv, ok := sds.data[key]
 	if ok && smv.death <= time.Now().Unix() {
-		delete(sds.data, key)
+		sds.unsafeDelete(key)
 		ok = false
 	}
 	sds.mutex.RUnlock()
@@ -88,8 +92,12 @@ func (sds SdrieDataStore) mutexSet(key string, value sdrieMapValue) {
 
 func (sds SdrieDataStore) mutexDelete(key string) {
 	sds.mutex.Lock()
-	delete(sds.data, key)
+	sds.unsafeDelete(key)
 	sds.mutex.Unlock()
+}
+
+func (sds SdrieDataStore) unsafeDelete(key string) {
+	delete(sds.data, key)
 }
 
 //
