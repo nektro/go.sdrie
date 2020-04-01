@@ -23,7 +23,6 @@ func New() SdrieDataStore {
 		list.New(),
 		sync.RWMutex{},
 	}
-	go sds.checkForDeadKeys()
 	return sds
 }
 
@@ -98,24 +97,4 @@ func (sds SdrieDataStore) mutexDelete(key string) {
 
 func (sds SdrieDataStore) unsafeDelete(key string) {
 	delete(sds.data, key)
-}
-
-//
-
-func (sds SdrieDataStore) checkForDeadKeys() {
-	for true {
-		now := time.Now().Unix() * 1000
-		toRemove := []*list.Element{}
-		for e := sds.line.Front(); e != nil; e = e.Next() {
-			k := e.Value.(string)
-			if sds.data[k].death <= now {
-				toRemove = append(toRemove, e)
-				sds.mutexDelete(k)
-			}
-		}
-		for _, item := range toRemove {
-			sds.line.Remove(item)
-		}
-		time.Sleep(time.Second)
-	}
 }
