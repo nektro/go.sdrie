@@ -1,14 +1,12 @@
 package sdrie
 
 import (
-	"container/list"
 	"sync"
 	"time"
 )
 
 type SdrieDataStore struct {
 	data  map[string]sdrieMapValue
-	line  *list.List
 	mutex sync.RWMutex
 }
 
@@ -20,7 +18,6 @@ type sdrieMapValue struct {
 func New() SdrieDataStore {
 	sds := SdrieDataStore{
 		map[string]sdrieMapValue{},
-		list.New(),
 		sync.RWMutex{},
 	}
 	return sds
@@ -34,18 +31,11 @@ func (sds SdrieDataStore) Delete(key string) {
 // mapping will only exist for {lifespan} milliseconds. After which, any subsequent
 // calls to Get will return nil unless a new value is Set.
 func (sds SdrieDataStore) Set(key string, value interface{}, lifespan int64) {
-	for e := sds.line.Front(); e != nil; e = e.Next() {
-		k := e.Value.(string)
-		if k == key {
-			sds.line.Remove(e)
-		}
-	}
 	temp := sdrieMapValue{
 		lifespan,
 		value,
 	}
 	sds.mutexSet(key, temp)
-	sds.line.PushBack(key)
 }
 
 // Get retrieves the current live value associated to {key} in the store.
@@ -67,7 +57,7 @@ func (sds SdrieDataStore) Has(key string) bool {
 func (sds SdrieDataStore) mutexHas(key string) bool {
 	sds.mutex.RLock()
 	smv, ok := sds.data[key]
-	if ok && smv.death <= (time.Now().Unix() * 1000) {
+	if ok && smv.death <= (time.Now().Unix()*1000) {
 		sds.unsafeDelete(key)
 		ok = false
 	}
