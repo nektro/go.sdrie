@@ -32,7 +32,7 @@ func (sds SdrieDataStore) Delete(key string) {
 }
 
 // Set inserts {value} into the data store with an association to {key}. This
-// mapping will only exist for {lifespan} seconds. After which, any subsequent
+// mapping will only exist for {lifespan} milliseconds. After which, any subsequent
 // calls to Get will return nil unless a new value is Set.
 func (sds SdrieDataStore) Set(key string, value interface{}, lifespan int64) {
 	for e := sds.line.Front(); e != nil; e = e.Next() {
@@ -85,7 +85,7 @@ func (sds SdrieDataStore) mutexGet(key string) sdrieMapValue {
 
 func (sds SdrieDataStore) mutexSet(key string, value sdrieMapValue) {
 	sds.mutex.Lock()
-	value.death += time.Now().Unix()
+	value.death += time.Now().Unix() * 1000
 	sds.data[key] = value
 	sds.mutex.Unlock()
 }
@@ -104,7 +104,7 @@ func (sds SdrieDataStore) unsafeDelete(key string) {
 
 func (sds SdrieDataStore) checkForDeadKeys() {
 	for true {
-		now := time.Now().Unix()
+		now := time.Now().Unix() * 1000
 		toRemove := []*list.Element{}
 		for e := sds.line.Front(); e != nil; e = e.Next() {
 			k := e.Value.(string)

@@ -18,7 +18,7 @@ $ go get -u github.com/nektro/sdrie
 
 ### `SdrieDataStore.Set`
 - `Set(key string, value string, lifespan int64)`
-- `Set` adds `value` to the data store associated to `key` and will survive for `lifespan` seconds.
+- `Set` adds `value` to the data store associated to `key` and will survive for `lifespan` milliseconds.
 
 ### `SdrieDataStore.Get`
 - `Get(key string) interface{}`
@@ -27,6 +27,10 @@ $ go get -u github.com/nektro/sdrie
 ### `SdrieDataStore.Has`
 - `Has(key string) bool`
 - `Has` returns a `bool` based on whether or not `key` exists in the data store. 
+
+### `SdrieDataStore.Delete`
+- `Delete(key string)`
+- `Delete` retrieves the value associated to `key` or 'no-op' if key doesn't exist
 
 ## Contributing
 We take issues all the time right here on GitHub. We use labels extensively to show the progress through the fixing process. Question issues are okay but make sure to close the issue when it's been answered!
