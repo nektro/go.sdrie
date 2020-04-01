@@ -68,7 +68,7 @@ func (sds SdrieDataStore) Has(key string) bool {
 func (sds SdrieDataStore) mutexHas(key string) bool {
 	sds.mutex.RLock()
 	smv, ok := sds.data[key]
-	if ok && smv.death <= time.Now().Unix() {
+	if ok && smv.death <= (time.Now().Unix() * 1000) {
 		sds.unsafeDelete(key)
 		ok = false
 	}
