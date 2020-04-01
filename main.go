@@ -5,9 +5,12 @@ import (
 	"time"
 )
 
+var defaultCleanupTriggerThresold int = 1000
+
 type SdrieDataStore struct {
-	data  map[string]sdrieMapValue
-	mutex sync.RWMutex
+	data                    map[string]sdrieMapValue
+	cleanupTriggerThreshold int
+	mutex                   sync.RWMutex
 }
 
 type sdrieMapValue struct {
@@ -15,15 +18,24 @@ type sdrieMapValue struct {
 	value interface{}
 }
 
-func New() SdrieDataStore {
+func New(cleanupTriggerThreshold int) SdrieDataStore {
+	if cleanupTriggerThreshold <= 0 {
+		// if map exceeds threshold size, run cleanup
+		cleanupTriggerThreshold = defaultCleanupTriggerThresold
+	}
 	sds := SdrieDataStore{
 		map[string]sdrieMapValue{},
+		cleanupTriggerThreshold,
 		sync.RWMutex{},
 	}
 	return sds
 }
 
 func (sds SdrieDataStore) Delete(key string) {
+	if sds.mutexGetSize() >= sds.cleanupTriggerThreshold {
+		// if map exceeds threshold size, run cleanup
+		sds.mutexCleanup()
+	}
 	sds.mutexDelete(key)
 }
 
@@ -31,6 +43,10 @@ func (sds SdrieDataStore) Delete(key string) {
 // mapping will only exist for {lifespan} milliseconds. After which, any subsequent
 // calls to Get will return nil unless a new value is Set.
 func (sds SdrieDataStore) Set(key string, value interface{}, lifespan int64) {
+	if sds.mutexGetSize() >= sds.cleanupTriggerThreshold {
+		// if map exceeds threshold size, run cleanup
+		sds.mutexCleanup()
+	}
 	temp := sdrieMapValue{
 		lifespan,
 		value,
@@ -49,6 +65,9 @@ func (sds SdrieDataStore) Get(key string) interface{} {
 
 // Has returns a boolean based on whether or not the store contains a value for {key}.
 func (sds SdrieDataStore) Has(key string) bool {
+	if sds.mutexGetSize() >= sds.cleanupTriggerThreshold {
+		sds.mutexCleanup()
+	}
 	return sds.mutexHas(key)
 }
 
@@ -83,6 +102,38 @@ func (sds SdrieDataStore) mutexDelete(key string) {
 	sds.mutex.Lock()
 	sds.unsafeDelete(key)
 	sds.mutex.Unlock()
+}
+
+func (sds SdrieDataStore) mutexGetSize() int {
+	sds.mutex.Lock()
+	size := sds.unsafeGetSize()
+	sds.mutex.Unlock()
+	return size
+}
+
+func (sds SdrieDataStore) mutexCleanup() {
+	sds.mutex.Lock()
+	sds.unsafeCleanup()
+	sds.mutex.Unlock()
+}
+
+func (sds SdrieDataStore) unsafeGetSize() int {
+	return len(sds.data)
+}
+
+func (sds SdrieDataStore) unsafeCleanup() {
+	// find expired keys
+	keysToDelete := []string{}
+	now := time.Now().Unix() * 1000
+	for key, smv := range sds.data {
+		if smv.death <= now {
+			keysToDelete = append(keysToDelete, key)
+		}
+	}
+	// delete expired keys
+	for _, key := range keysToDelete {
+		sds.unsafeDelete(key)
+	}
 }
 
 func (sds SdrieDataStore) unsafeDelete(key string) {

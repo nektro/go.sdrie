@@ -13,8 +13,10 @@ $ go get -u github.com/nektro/sdrie
 
 ## Usage
 ### `sdrie.New`
-- `New() SdrieDataStore`
-- `New` returns a new instance of a `SdrieDataStore`.
+- `New(cleanupTriggerThreshold int) SdrieDataStore`
+- `New` returns a new instance of a `SdrieDataStore`
+- Once the size of data-store reaches `cleanupTriggerThreshold`, each subsequent operation attempts a cleanup of expired keys
+- Passing 0 or negative integer in `cleanupTriggerThreshold` sets it to default value of 1000
 
 ### `SdrieDataStore.Set`
 - `Set(key string, value string, lifespan int64)`
