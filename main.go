@@ -37,12 +37,8 @@ func (sds *SdrieDataStore) Set(key string, value interface{}, lifespan time.Dura
 			sds.line.Remove(e)
 		}
 	}
-	temp := sdrieMapValue{
-		(time.Now().UTC().Add(lifespan)).Unix(),
-		value,
-	}
-	sds.mutexSet(key, temp)
 	sds.line.PushBack(key)
+	sds.mutexSet(key, value, lifespan)
 }
 
 // Get retrieves the current live value associated to {key} in the store.
@@ -71,9 +67,12 @@ func (sds *SdrieDataStore) mutexGet(key string) sdrieMapValue {
 	return smv
 }
 
-func (sds *SdrieDataStore) mutexSet(key string, value sdrieMapValue) {
+func (sds *SdrieDataStore) mutexSet(key string, value interface{}, lifespan time.Duration) {
 	sds.mutex.Lock()
-	sds.data[key] = value
+	sds.data[key] = sdrieMapValue{
+		(time.Now().UTC().Add(lifespan)).Unix(),
+		value,
+	}
 	sds.mutex.Unlock()
 }
 
