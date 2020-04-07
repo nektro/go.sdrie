@@ -18,7 +18,7 @@ $ go get -u github.com/nektro/sdrie
 - `New` returns a new instance of a `SdrieDataStore`.
 
 ### `SdrieDataStore.Set`
-- `Set(key string, value string, lifespan int64)`
+- `Set(key string, value string, lifespan time.Duration)`
 - `Set` adds `value` to the data store associated to `key` and will survive for `lifespan` seconds.
 
 ### `SdrieDataStore.Get`

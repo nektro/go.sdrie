@@ -30,7 +30,7 @@ func New() *SdrieDataStore {
 // Set inserts {value} into the data store with an association to {key}. This
 // mapping will only exist for {lifespan} seconds. After which, any subsequent
 // calls to Get will return nil unless a new value is Set.
-func (sds SdrieDataStore) Set(key string, value interface{}, lifespan int64) {
+func (sds *SdrieDataStore) Set(key string, value interface{}, lifespan time.Duration) {
 	for e := sds.line.Front(); e != nil; e = e.Next() {
 		k := e.Value.(string)
 		if k == key {
@@ -38,7 +38,7 @@ func (sds SdrieDataStore) Set(key string, value interface{}, lifespan int64) {
 		}
 	}
 	temp := sdrieMapValue{
-		time.Now().Unix() + lifespan,
+		(time.Now().UTC().Add(lifespan)).Unix(),
 		value,
 	}
 	sds.mutexSet(key, temp)
