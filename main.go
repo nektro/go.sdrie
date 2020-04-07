@@ -96,16 +96,18 @@ func (sds *SdrieDataStore) checkForDeadKeys() {
 	for true {
 		time.Sleep(time.Second)
 		now := time.Now().Unix()
-		toRemove := []*list.Element{}
-		for e := sds.line.Front(); e != nil; e = e.Next() {
-			k := e.Value.(string)
-			if sds.data[k].death <= now {
-				toRemove = append(toRemove, e)
-				sds.mutexDelete(k)
-			}
+		a := sds.line.Front()
+		if a == nil {
+			continue
 		}
-		for _, item := range toRemove {
-			sds.line.Remove(item)
+		k := a.Value.(string)
+		x, ok := sds.data[k]
+		if !ok {
+			continue
+		}
+		if now > x.death {
+			sds.mutexDelete(k)
+			sds.line.Remove(a)
 		}
 	}
 }
