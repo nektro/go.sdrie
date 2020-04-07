@@ -94,6 +94,7 @@ func (sds *SdrieDataStore) mutexDelete(key string) {
 
 func (sds *SdrieDataStore) checkForDeadKeys() {
 	for true {
+		time.Sleep(time.Second)
 		now := time.Now().Unix()
 		toRemove := []*list.Element{}
 		for e := sds.line.Front(); e != nil; e = e.Next() {
@@ -106,6 +107,5 @@ func (sds *SdrieDataStore) checkForDeadKeys() {
 		for _, item := range toRemove {
 			sds.line.Remove(item)
 		}
-		time.Sleep(time.Second)
 	}
 }
