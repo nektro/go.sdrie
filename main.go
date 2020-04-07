@@ -75,7 +75,7 @@ func (sds *SdrieDataStore) mutexSet(key string, value interface{}, lifespan time
 			sds.line.PushBack(key)
 			break
 		}
-		v := x.Value.(sdrieMapValue)
+		v := sds.data[x.Value.(string)]
 		if v.death > death {
 			sds.line.InsertBefore(key, x)
 			break
