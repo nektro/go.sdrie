@@ -1,8 +1,9 @@
 # sdrie
-![loc](https://tokei.rs/b1/github/nektro/sdrie)
-[![license](https://img.shields.io/github/license/nektro/sdrie.svg)](https://github.com/nektro/sdrie/blob/master/LICENSE)
-[![paypal](https://img.shields.io/badge/donate-paypal-blue.svg?logo=paypal)](https://www.paypal.me/nektro)
-[![discord](https://img.shields.io/discord/551971034593755159.svg)](https://discord.gg/P6Y4zQC)
+![loc](https://sloc.xyz/github/nektro/go.sdrie)
+[![license](https://img.shields.io/github/license/nektro/go.sdrie.svg)](https://github.com/nektro/go.sdrie/blob/master/LICENSE)
+[![discord](https://img.shields.io/discord/551971034593755159.svg?logo=discord)](https://discord.gg/P6Y4zQC)
+[![paypal](https://img.shields.io/badge/donate-paypal-009cdf?logo=paypal)](https://paypal.me/nektro)
+[![goreportcard](https://goreportcard.com/badge/github.com/nektro/go.sdrie)](https://goreportcard.com/report/github.com/nektro/go.sdrie)
 
 An in-process key/value store for data with expiration dates in Go
 
