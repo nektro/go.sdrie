@@ -37,7 +37,6 @@ func (sds *SdrieDataStore) Set(key string, value interface{}, lifespan time.Dura
 			sds.line.Remove(e)
 		}
 	}
-	sds.line.PushBack(key)
 	sds.mutexSet(key, value, lifespan)
 }
 
@@ -71,6 +70,17 @@ func (sds *SdrieDataStore) mutexSet(key string, value interface{}, lifespan time
 	sds.mutex.Lock()
 	death := (time.Now().UTC().Add(lifespan)).Unix()
 	sds.data[key] = sdrieMapValue{death, value}
+	for x := sds.line.Front(); true; x = x.Next() {
+		if x == nil {
+			sds.line.PushBack(key)
+			break
+		}
+		v := x.Value.(sdrieMapValue)
+		if v.death > death {
+			sds.line.InsertBefore(key, x)
+			break
+		}
+	}
 	sds.mutex.Unlock()
 }
 
