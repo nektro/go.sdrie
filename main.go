@@ -69,10 +69,8 @@ func (sds *SdrieDataStore) mutexGet(key string) sdrieMapValue {
 
 func (sds *SdrieDataStore) mutexSet(key string, value interface{}, lifespan time.Duration) {
 	sds.mutex.Lock()
-	sds.data[key] = sdrieMapValue{
-		(time.Now().UTC().Add(lifespan)).Unix(),
-		value,
-	}
+	death := (time.Now().UTC().Add(lifespan)).Unix()
+	sds.data[key] = sdrieMapValue{death, value}
 	sds.mutex.Unlock()
 }
 
