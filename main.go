@@ -17,8 +17,8 @@ type sdrieMapValue struct {
 	value interface{}
 }
 
-func New() SdrieDataStore {
-	sds := SdrieDataStore{
+func New() *SdrieDataStore {
+	sds := &SdrieDataStore{
 		map[string]sdrieMapValue{},
 		list.New(),
 		sync.RWMutex{},
@@ -46,7 +46,7 @@ func (sds SdrieDataStore) Set(key string, value interface{}, lifespan int64) {
 }
 
 // Get retrieves the current live value associated to {key} in the store.
-func (sds SdrieDataStore) Get(key string) interface{} {
+func (sds *SdrieDataStore) Get(key string) interface{} {
 	if !sds.Has(key) {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (sds SdrieDataStore) Get(key string) interface{} {
 
 // Has returns a boolean based on whether or not the store contains a value for
 // {key}.
-func (sds SdrieDataStore) Has(key string) bool {
+func (sds *SdrieDataStore) Has(key string) bool {
 	sds.mutex.RLock()
 	_, ok := sds.data[key]
 	sds.mutex.RUnlock()
@@ -64,20 +64,20 @@ func (sds SdrieDataStore) Has(key string) bool {
 
 //
 
-func (sds SdrieDataStore) mutexGet(key string) sdrieMapValue {
+func (sds *SdrieDataStore) mutexGet(key string) sdrieMapValue {
 	sds.mutex.RLock()
 	smv := sds.data[key]
 	sds.mutex.RUnlock()
 	return smv
 }
 
-func (sds SdrieDataStore) mutexSet(key string, value sdrieMapValue) {
+func (sds *SdrieDataStore) mutexSet(key string, value sdrieMapValue) {
 	sds.mutex.Lock()
 	sds.data[key] = value
 	sds.mutex.Unlock()
 }
 
-func (sds SdrieDataStore) mutexDelete(key string) {
+func (sds *SdrieDataStore) mutexDelete(key string) {
 	sds.mutex.Lock()
 	delete(sds.data, key)
 	sds.mutex.Unlock()
@@ -85,7 +85,7 @@ func (sds SdrieDataStore) mutexDelete(key string) {
 
 //
 
-func (sds SdrieDataStore) checkForDeadKeys() {
+func (sds *SdrieDataStore) checkForDeadKeys() {
 	for true {
 		now := time.Now().Unix()
 		toRemove := []*list.Element{}
